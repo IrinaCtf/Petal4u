@@ -23,21 +23,22 @@ for file in os.listdir(data_dir):
         except Exception as e:
             print(f"Error loading {file}: {e}")
 
-
 def get_pinyin(char):
     return lazy_pinyin(char)[0] if char else ""
 
-def find_relay_line(last_char):
+def find_relay_line(last_char, used_lines):
     target_py = get_pinyin(last_char)
-    for poem in poems:
-        for line in poem["content"]:
-            if line and get_pinyin(line[0]) == target_py:
-                return line
-    return None
+    candidates = [
+        line for poem in poems for line in poem["content"]
+        if line and get_pinyin(line[0]) == target_py and line not in used_lines
+    ]
+    return random.choice(candidates) if candidates else None
 
 def find_feihua_line(keyword, used_lines):
-    candidates = [line for poem in poems for line in poem["content"]
-                  if keyword in line and line not in used_lines]
+    candidates = [
+        line for poem in poems for line in poem["content"]
+        if keyword in line and line not in used_lines
+    ]
     return random.choice(candidates) if candidates else None
 
 @app.route("/")
@@ -53,7 +54,12 @@ def get_line():
     used = data.get("used", [])
 
     if mode == "relay":
-        response = find_relay_line(prev[-1]) if prev else "白日依山尽"
+        if prev:
+            response = find_relay_line(prev[-1], used)
+            if not response:
+                response = "我输了，找不到更多的接龙诗句了。"
+        else:
+            response = random.choice([line for poem in poems for line in poem["content"]])
     elif mode == "feihua":
         response = find_feihua_line(keyword, used)
         if not response:
