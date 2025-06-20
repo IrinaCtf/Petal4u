@@ -1,0 +1,34 @@
+body {
+    font-family: 'Georgia', serif;
+    background-color: #fef6f0;
+    color: #3e3e3e;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 700px;
+    margin: 5% auto;
+    text-align: center;
+}
+input {
+    width: 60%;
+    padding: 10px;
+    font-size: 1.1em;
+}
+button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    font-size: 1em;
+    background-color: #eec8c2;
+    border: none;
+    cursor: pointer;
+}
+#resultArea {
+    margin-top: 30px;
+    font-size: 1.2em;
+}
+.subtitle {
+    font-style: italic;
+    margin-bottom: 20px;
+    color: #b25c5c;
+}
