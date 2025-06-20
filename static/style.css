@@ -1,0 +1,23 @@
+
+body {
+    font-family: 'Georgia', serif;
+    background-color: #fef6f0;
+}
+.container {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+input, button {
+    padding: 10px;
+    margin: 5px;
+}
+#history {
+    margin-top: 20px;
+    background: #f3e6e6;
+    padding: 10px;
+    border-radius: 10px;
+}

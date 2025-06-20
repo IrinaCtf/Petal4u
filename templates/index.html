@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Petal for You - Flask版</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Petal for You</h1>
+        <p class="subtitle">Python + Flask 实现的诗词接龙 / 飞花令</p>
+
+        <label><input type="radio" name="mode" value="relay" checked> 诗词接龙</label>
+        <label><input type="radio" name="mode" value="feihua"> 飞花令</label><br>
+        <input type="text" id="keyword" placeholder="输入拼音或关键词">
+        <button onclick="startGame()">开始游戏</button>
+
+        <div id="gameArea" style="display:none;">
+            <div id="history"></div>
+            <input type="text" id="userInput" placeholder="请输入你的诗句">
+            <button onclick="submitLine()">提交</button>
+        </div>
+    </div>
+
+<script>
+let mode = "relay";
+let keyword = "";
+let history = [];
+
+function startGame() {
+    mode = document.querySelector("input[name='mode']:checked").value;
+    keyword = document.getElementById("keyword").value.trim();
+    history = [];
+    document.getElementById("history").innerHTML = "";
+    document.getElementById("gameArea").style.display = "block";
+
+    fetch("/get_line", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mode: mode, prev: "", keyword: keyword})
+    }).then(res => res.json()).then(data => {
+        history.push({player: "Bot", line: data.line});
+        updateHistory();
+    });
+}
+
+function submitLine() {
+    const userInput = document.getElementById("userInput").value.trim();
+    if (!userInput) return;
+    history.push({player: "You", line: userInput});
+    updateHistory();
+    document.getElementById("userInput").value = "";
+
+    fetch("/get_line", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            mode: mode,
+            prev: userInput,
+            keyword: keyword,
+            used: history.map(h => h.line)
+        })
+    }).then(res => res.json()).then(data => {
+        history.push({player: "Bot", line: data.line});
+        updateHistory();
+    });
+}
+
+function updateHistory() {
+    document.getElementById("history").innerHTML =
+        history.map(h => `<div><strong>${h.player}:</strong> ${h.line}</div>`).join("");
+}
+</script>
+</body>
+</html>
