@@ -1,5 +1,6 @@
 # Petal4u: 简易的诗词接龙/飞花令网站
 
+## How to Run
 ```bash
 pip install -r requirements.txt
 python app.py

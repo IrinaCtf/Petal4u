@@ -2,3 +2,5 @@ flask
 pypinyin
 os
 requests
+random
+json
