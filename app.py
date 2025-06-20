@@ -2,20 +2,36 @@ from flask import Flask, render_template, request, jsonify
 from pypinyin import lazy_pinyin
 import json
 import random
+import os
 
 app = Flask(__name__)
 
-with open("poems.json", encoding="utf-8") as f:
-    poems = json.load(f)
+# Load all poem files from the data directory
+poems = []
+data_dir = "chinese_poetry_json"
+for file in os.listdir(data_dir):
+    if file.endswith(".json"):
+        path = os.path.join(data_dir, file)
+        try:
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+                for entry in data:
+                    entry["content"] = entry.get("paragraphs", [])
+                    poems.append(entry)
+        except json.JSONDecodeError:
+            print(f"Skipped invalid JSON file: {file}")
+        except Exception as e:
+            print(f"Error loading {file}: {e}")
+
 
 def get_pinyin(char):
-    return lazy_pinyin(char)[0]
+    return lazy_pinyin(char)[0] if char else ""
 
 def find_relay_line(last_char):
     target_py = get_pinyin(last_char)
     for poem in poems:
         for line in poem["content"]:
-            if get_pinyin(line[0]) == target_py:
+            if line and get_pinyin(line[0]) == target_py:
                 return line
     return None
 
@@ -49,5 +65,3 @@ def get_line():
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)
-
-
