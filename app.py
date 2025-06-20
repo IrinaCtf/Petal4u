@@ -27,6 +27,7 @@ def get_pinyin(char):
     return lazy_pinyin(char)[0] if char else ""
 
 def find_relay_line(last_char, used_lines):
+    """Find a line whose first character has same pinyin as last_char."""
     target_py = get_pinyin(last_char)
     candidates = [
         line for poem in poems for line in poem["content"]
@@ -34,7 +35,16 @@ def find_relay_line(last_char, used_lines):
     ]
     return random.choice(candidates) if candidates else None
 
+def find_relay_line_by_pinyin(pinyin_prefix, used_lines):
+    """Start game by matching first char's pinyin with user-input pinyin."""
+    candidates = [
+        line for poem in poems for line in poem["content"]
+        if line and get_pinyin(line[0]) == pinyin_prefix and line not in used_lines
+    ]
+    return random.choice(candidates) if candidates else None
+
 def find_feihua_line(keyword, used_lines):
+    """Find a line that contains the keyword and is not used."""
     candidates = [
         line for poem in poems for line in poem["content"]
         if keyword in line and line not in used_lines
@@ -48,18 +58,27 @@ def index():
 @app.route("/get_line", methods=["POST"])
 def get_line():
     data = request.json
-    mode = data["mode"]
-    prev = data["prev"]
-    keyword = data["keyword"]
+    mode = data.get("mode")
+    prev = data.get("prev", "").strip()
+    keyword = data.get("keyword", "").strip()
     used = data.get("used", [])
 
     if mode == "relay":
         if prev:
-            response = find_relay_line(prev[-1], used)
-            if not response:
-                response = "我输了，找不到更多的接龙诗句了。"
+            if all(c.isalpha() for c in prev):  # Input is pinyin
+                response = find_relay_line_by_pinyin(prev.lower(), used)
+                if not response:
+                    response = "我输了，找不到拼音开头的诗句了。"
+            else:
+                last_char = prev[-1]
+                response = find_relay_line(last_char, used)
+                if not response:
+                    response = "我输了，找不到更多的接龙诗句了。"
         else:
-            response = random.choice([line for poem in poems for line in poem["content"]])
+            response = random.choice([
+                line for poem in poems for line in poem["content"]
+                if line not in used
+            ])
     elif mode == "feihua":
         response = find_feihua_line(keyword, used)
         if not response:

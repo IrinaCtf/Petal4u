@@ -8,7 +8,7 @@
 <body>
     <div class="container">
         <h1>Petal for You</h1>
-        <p class="subtitle">Python + Flask 实现的诗词接龙 / 飞花令</p>
+        <p class="subtitle">Each petal falls for you, each verse recalls you.</p>
 
         <label><input type="radio" name="mode" value="relay" checked> 诗词接龙</label>
         <label><input type="radio" name="mode" value="feihua"> 飞花令</label><br>
@@ -19,6 +19,7 @@
             <div id="history"></div>
             <input type="text" id="userInput" placeholder="请输入你的诗句">
             <button onclick="submitLine()">提交</button>
+            <button onclick="autoAnswer()">你帮我答</button>
         </div>
     </div>
 
@@ -63,6 +64,40 @@ function submitLine() {
     }).then(res => res.json()).then(data => {
         history.push({player: "Bot", line: data.line});
         updateHistory();
+    });
+}
+
+function autoAnswer() {
+    const lastLine = history.length > 0 ? history[history.length - 1].line : "";
+
+    fetch("/get_line", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            mode: mode,
+            prev: lastLine,
+            keyword: keyword,
+            used: history.map(h => h.line)
+        })
+    }).then(res => res.json()).then(data => {
+        // 系统代替用户答一句
+        history.push({player: "You", line: data.line});
+        updateHistory();
+
+        // 然后继续由系统对一句
+        fetch("/get_line", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                mode: mode,
+                prev: data.line,
+                keyword: keyword,
+                used: history.map(h => h.line)
+            })
+        }).then(res => res.json()).then(data2 => {
+            history.push({player: "Bot", line: data2.line});
+            updateHistory();
+        });
     });
 }
 
