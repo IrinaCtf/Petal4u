@@ -68,12 +68,12 @@ def get_line():
             if all(c.isalpha() for c in prev):  # Input is pinyin
                 response = find_relay_line_by_pinyin(prev.lower(), used)
                 if not response:
-                    response = "我输了，找不到拼音开头的诗句了。"
+                    response = "我翻遍詩海，也找不到比你更溫柔的句子。"
             else:
                 last_char = prev[-1]
                 response = find_relay_line(last_char, used)
                 if not response:
-                    response = "我输了，找不到更多的接龙诗句了。"
+                    response = "我翻遍詩海，也找不到比你更溫柔的句子。"
         else:
             response = random.choice([
                 line for poem in poems for line in poem["content"]
@@ -82,7 +82,7 @@ def get_line():
     elif mode == "feihua":
         response = find_feihua_line(keyword, used)
         if not response:
-            response = "我输了，找不到更多的诗句了。"
+            response = "我翻遍詩海，也找不到比你更溫柔的句子。"
     else:
         response = "未知模式"
 
